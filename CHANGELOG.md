@@ -2,6 +2,12 @@
 
 本项目的重要版本变化记录在此。版本号由 `fpk/manifest` 统一管理。
 
+## [1.6.41] - 2026-11-10
+
+- 修复 DNS 配置段内含注释时，保存高级 YAML 会产生重复键并报 `mapping key already defined` 的问题。
+- DNS 编辑模式的「表单 / 高级 YAML」按钮明确显示当前选中状态。
+- 更新至 Clash-Manager 1.6.41。
+
 ## [1.6.40] - 2026-11-10
 
 - 修复 Windows 构建时前端资源基路径被转换为 `/Program Files/Git/...`、导致页面空白和 JS/CSS 404 的问题。
