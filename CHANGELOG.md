@@ -2,6 +2,12 @@
 
 本项目的重要版本变化记录在此。版本号由 `fpk/manifest` 统一管理。
 
+## [1.6.42] - 2026-11-10
+
+- 修复高级 DNS YAML 保存后再次应用订阅时，DNS 键以两种拼写重复写入、报 `mapping key already defined` 的问题。
+- YAML 模式保存的 DNS 会转换为表单结构，切换回表单也能正确显示。
+- 更新至 Clash-Manager 1.6.42。
+
 ## [1.6.41] - 2026-11-10
 
 - 修复 DNS 配置段内含注释时，保存高级 YAML 会产生重复键并报 `mapping key already defined` 的问题。
