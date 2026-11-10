@@ -83,7 +83,35 @@ delete_app_data() {
   done
 }
 
+cleanup_bypass_rules() {
+  local helper="" appdir="${TRIM_APPDEST:-}" pkgvar="${TRIM_PKGVAR:-}"
+  case "$(uname -m)" in
+    x86_64|amd64) helper="${appdir}/server/bin/clash-for-fnos-helper-x86_64" ;;
+    aarch64|arm64) helper="${appdir}/server/bin/clash-for-fnos-helper-arm64" ;;
+  esac
+  if [ -n "$helper" ] && [ -x "$helper" ]; then
+    PRIV_SOCKET_PATH="${pkgvar}/clash-for-fnos-priv.sock" \
+    TRIM_PKGETC="${TRIM_PKGETC:-}" TRIM_PKGVAR="$pkgvar" TRIM_APPDEST="$appdir" \
+      "$helper" --cleanup-bypass >> "${TRIM_TEMP_LOGFILE:-/dev/null}" 2>&1 || true
+  fi
+  # Fallback for a missing helper: only remove resources this app owns.
+  if command -v nft >/dev/null 2>&1; then
+    if nft list table ip clash_manager_bypass 2>/dev/null | grep -q 'clash-manager:'; then
+      nft delete table ip clash_manager_bypass 2>/dev/null || true
+    fi
+  fi
+  if command -v ip >/dev/null 2>&1; then
+    if ip -4 rule show 2>/dev/null | grep -q '18462:.*fwmark 0x434d/0xffff'; then
+      ip -4 rule del priority 18462 fwmark 0x434d/0xffff lookup 18462 2>/dev/null || true
+    fi
+    if ip -4 route show table 18462 2>/dev/null | grep -q 'local default dev lo'; then
+      ip -4 route del local 0.0.0.0/0 dev lo table 18462 2>/dev/null || true
+    fi
+  fi
+}
+
 strip_managed_proxy_blocks || exit 1
+cleanup_bypass_rules
 
 case "${wizard_delete_data:-false}" in
   true) delete_app_data || exit 1 ;;
