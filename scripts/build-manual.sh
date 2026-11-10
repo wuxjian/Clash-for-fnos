@@ -73,6 +73,20 @@ VITE_APP_BASE=/app/clash-for-fnos/ npm --prefix "$WEB" run build
 
 # Stage common source. Only this staged copy is modified.
 cp -a "$SRC/." "$STAGE/"
+# fnOS executes lifecycle scripts on Linux. Normalize CRLF from Windows
+# checkouts so the packaged shebang and shell syntax stay valid.
+python3 - "$STAGE" <<'PYTHON'
+import sys
+from pathlib import Path
+stage = Path(sys.argv[1])
+targets = list((stage / 'cmd').glob('*')) + [stage / 'wizard' / 'uninstall']
+for path in targets:
+    if not path.is_file():
+        continue
+    data = path.read_bytes()
+    if b'\r\n' in data:
+        path.write_bytes(data.replace(b'\r\n', b'\n'))
+PYTHON
 "$ROOT/scripts/sync-version.sh" "$STAGE"
 rm -rf "$STAGE/app/server"
 mkdir -p "$STAGE/app/server/public"
