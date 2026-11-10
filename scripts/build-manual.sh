@@ -114,7 +114,7 @@ from pathlib import Path
 info=json.loads(Path(sys.argv[1]).read_text())
 public=Path(sys.argv[3])
 version=next(line.split('=',1)[1].strip() for line in Path(sys.argv[4]).read_text().splitlines() if line.startswith('version'))
-info=dict(upstream=info, packageVersion=version, updateRepository=sys.argv[5], frontend={str(p.relative_to(public)):hashlib.sha256(p.read_bytes()).hexdigest() for p in public.rglob('*') if p.is_file()})
+info=dict(upstream=info, packageVersion=version, updateRepository=sys.argv[5], frontend={p.relative_to(public).as_posix():hashlib.sha256(p.read_bytes()).hexdigest() for p in public.rglob('*') if p.is_file()})
 Path(sys.argv[2]).write_text(json.dumps(info, indent=2)+'\n')
 PYTHON
 
