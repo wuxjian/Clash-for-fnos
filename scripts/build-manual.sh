@@ -170,6 +170,7 @@ chmod 755 "$STAGE/app/server/bin/"*
 # app.tgz is the contents of app/, not the app directory itself.
 # macOS tar otherwise emits AppleDouble metadata alongside Linux app files.
 COPYFILE_DISABLE=1 LC_ALL=C tar -C "$STAGE/app" -czf "$PKG/app.tgz" .
+python3 "$ROOT/scripts/normalize-tar.py" "$PKG/app.tgz" "server/bin/" "core/mihomo"
 CHECKSUM="$(md5sum "$PKG/app.tgz" | awk '{print $1}')"
 
 cp -a "$STAGE/cmd" "$STAGE/config" "$STAGE/wizard" "$PKG/"
@@ -185,6 +186,7 @@ chmod 755 "$PKG/cmd/"*
 
 NAME="Clash for fnos_${VERSION}_${PACKAGE_ARCH}.fpk"
 COPYFILE_DISABLE=1 LC_ALL=C tar -C "$PKG" -czf "$OUT/$NAME" .
+python3 "$ROOT/scripts/normalize-tar.py" "$OUT/$NAME" "cmd/" "wizard/"
 (
   cd "$OUT"
   sha256sum "$NAME" > "$NAME.sha256"
