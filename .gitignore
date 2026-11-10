@@ -16,3 +16,7 @@ node_modules/
 
 # Immutable upstream Git cache and isolated build inputs
 /.cache/
+
+# Local tooling artifacts
+__pycache__/
+.zcode/
