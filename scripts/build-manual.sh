@@ -69,7 +69,16 @@ fi
 STAGE="$WORK/stage"
 PKG="$WORK/pkg"
 mkdir -p "$OUT" "$STAGE" "$PKG"
-VITE_APP_BASE=/app/clash-for-fnos/ npm --prefix "$WEB" run build
+# Git Bash rewrites POSIX-looking env values to Windows paths unless the
+# variable is excluded, which produced "/Program Files/Git/app/..." assets.
+MSYS2_ENV_CONV_EXCL=VITE_APP_BASE VITE_APP_BASE=/app/clash-for-fnos/ npm --prefix "$WEB" run build
+python3 - "$WEB/dist/index.html" <<'PYTHON'
+import sys
+from pathlib import Path
+index = Path(sys.argv[1]).read_text(encoding='utf-8')
+if 'src="/app/clash-for-fnos/assets/' not in index or 'Program Files' in index or 'C:/' in index:
+    raise SystemExit('frontend asset base is not /app/clash-for-fnos/')
+PYTHON
 
 # Stage common source. Only this staged copy is modified.
 cp -a "$SRC/." "$STAGE/"

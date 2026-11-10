@@ -60,8 +60,13 @@ for architecture,platform,arches in [('x86_64','x86',['x86_64']),('arm64','arm',
         public=app/'server/public'
         assert info['frontend']=={str(p.relative_to(public)):sha(p) for p in public.rglob('*') if p.is_file()}
         index=(public/'index.html').read_text()
-        assert '<title>Clash for fnos</title>' in index and '/app/clash-for-fnos/assets/' in index
-        for asset in re.findall(r'(?:src|href)="(/app/clash-for-fnos/[^\"]+)"',index):assert (public/asset.removeprefix('/app/clash-for-fnos/')).exists()
+        assert '<title>Clash for fnos</title>' in index
+        assert 'Program Files' not in index and 'C:/' not in index
+        assets=re.findall(r'(?:src|href)="([^"]+)"',index)
+        assert assets
+        for asset in assets:
+            assert asset.startswith('/app/clash-for-fnos/'),asset
+            assert (public/asset.removeprefix('/app/clash-for-fnos/')).exists(),asset
         js='\n'.join(p.read_text() for p in (public/'assets').glob('*.js'))
         for needle in ['clash-manager.language.v1','zh-CN','en-US','## ['+version+']','连接超时，请检查服务状态后重试','Connection timed out. Check the service status and retry.','软件图标','Other settings']:
             assert needle in js,needle

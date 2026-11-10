@@ -14,4 +14,4 @@ WORK="$(cd "$WORK" && pwd -P)"
 trap 'rm -rf "$WORK"' EXIT
 "$ROOT/scripts/prepare-shared.sh" "$WORK/shared"
 (cd "$WORK/shared/backend" && go test -race ./... && go vet ./...)
-VITE_APP_BASE=/app/clash-for-fnos/ npm --prefix "$WORK/shared/web" run check
+MSYS2_ENV_CONV_EXCL=VITE_APP_BASE VITE_APP_BASE=/app/clash-for-fnos/ npm --prefix "$WORK/shared/web" run check
