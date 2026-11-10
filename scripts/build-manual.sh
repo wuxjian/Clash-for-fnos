@@ -95,6 +95,19 @@ mkdir -p "$STAGE/app/geodata" "$STAGE/app/licenses" "$STAGE/app/core"
 cp -a "$SHARED/assets/geodata/." "$STAGE/app/geodata/"
 cp -a "$SHARED/assets/licenses/." "$STAGE/app/licenses/"
 cp "$SHARED/assets/licenses/Mihomo-LICENSE-GPL-3.txt" "$STAGE/app/core/"
+# Windows Git can export CRLF text assets. The audit compares these files with
+# the locked Git blobs, which use LF, so normalize the packaged copies.
+python3 - "$STAGE/app/licenses" "$STAGE/app/core/Mihomo-LICENSE-GPL-3.txt" <<'PYTHON'
+import sys
+from pathlib import Path
+for name in sys.argv[1:]:
+    path = Path(name)
+    files = [path] if path.is_file() else [item for item in path.glob('*') if item.is_file()]
+    for item in files:
+        data = item.read_bytes()
+        if b'\r\n' in data:
+            item.write_bytes(data.replace(b'\r\n', b'\n'))
+PYTHON
 python3 - "$ROOT/upstream.lock" "$STAGE/app/build-info.json" "$WEB/dist" "$STAGE/manifest" "$UPDATE_REPO" <<'PYTHON'
 import hashlib, json, sys
 from pathlib import Path
